@@ -9,6 +9,8 @@ import org.gfg.DigitalLibrary.response.StudentCreationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 public class StudentService {
 
@@ -20,7 +22,7 @@ public class StudentService {
         String name = studentCreationRequest.getName();
         String email = studentCreationRequest.getEmail();
         String mobileNumber = studentCreationRequest.getMobileNumber();
-        String dob = studentCreationRequest.getDob();
+        LocalDate dob = studentCreationRequest.getDob();
         Address address = studentCreationRequest.getAddress();
 
         Student student = Student.builder().name(name).email(email).mobileNumber(mobileNumber).dob(dob).address(address).build();
@@ -28,10 +30,9 @@ public class StudentService {
 
         int rowsUpdated = 0;
         try {
-            rowsUpdated = studentRepository.createStudentDataBase(student);
+            rowsUpdated = studentRepository.createStudentInDatabase(student);
         } catch (Exception ex) {
             System.out.println("Exception : " + ex);
-            rowsUpdated = 0;
         }
 
         StudentCreationResponse studentCreationResponse = new StudentCreationResponse();

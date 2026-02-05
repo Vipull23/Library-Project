@@ -17,42 +17,44 @@ public class StudentRepository {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    private SimpleJdbcInsert jdbcInsert;
 
-//    public StudentRepository(SimpleJdbcInsert jdbcInsert) {
-//        this.jdbcInsert = jdbcInsert;
-//    }
+    private SimpleJdbcInsert jdbcInsert;
 
 
     @Autowired
-    StudentRepository(DataSource dataSource) {
-        this.jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("Student").usingGeneratedKeyColumns("id");
-//        this.jdbcInsert.withTableName("Student");
-//        this.jdbcInsert.usingGeneratedKeyColumns("id");
+    StudentRepository(DataSource dataSource){
+        this.jdbcInsert = new SimpleJdbcInsert(dataSource).withTableName("Student").usingColumns( "name",
+                "email",
+                "dob",
+                "mobile",
+                "status",
+                "createdOn",
+                "updatedOn").usingGeneratedKeyColumns("id");
+        //this.jdbcInsert.withTableName("Student");
+        //this.jdbcInsert.usingGeneratedKeyColumns("id");
     }
 
-    public int createStudentDataBase(Student student) {
-//        jdbcTemplate.update("INSERT INTO Student(name, email, dob, mobile, status, createdOn, updatedOn) VALUES (?,?,?,?,?,?,?", student.getName(),
-//                student.getEmail(),student.getDob(),student.getMobileNumber(), student.getStudentStatus(),new Date(),new Date());
+    public int createStudentInDatabase(Student student){
+     /*  int rows = jdbcTemplate.update("INSERT INTO Student(name, email, dob, mobile, status, createdOn, updatedOn) VALUES (?,?,?,?,?,?,?)", student.getName(),
+               student.getEmail(),student.getDob(),student.getMobileNo(),student.getStudentStatus(), new Date(),new Date());*/
 
         MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
-        mapSqlParameterSource.addValue("name", student.getName());
-        mapSqlParameterSource.addValue("email", student.getEmail());
-        mapSqlParameterSource.addValue("dob", student.getDob());
-        mapSqlParameterSource.addValue("mobile", student.getMobileNumber());
-        mapSqlParameterSource.addValue("status", student.getStudentStatus());
+        mapSqlParameterSource.addValue("name",student.getName());
+        mapSqlParameterSource.addValue("email",student.getEmail());
+        mapSqlParameterSource.addValue("dob",student.getDob());
+        mapSqlParameterSource.addValue("mobile",student.getMobileNumber());
+        mapSqlParameterSource.addValue("status", student.getStudentStatus().name());
         mapSqlParameterSource.addValue("createdOn", new Date());
-        mapSqlParameterSource.addValue("upDatedOn", new Date());
+        mapSqlParameterSource.addValue("updatedOn", new Date());
 
         Number number = jdbcInsert.executeAndReturnKey(mapSqlParameterSource);
         int studentId = number.intValue();
 
         System.out.println("Student Data inserted");
-
         Address address = student.getAddress();
-        int ar = jdbcTemplate.update("INSERT INTO Address (studentId, street, city, pincode) VALUES (?,?,?,?)", studentId, address.getStreet(), address.getCity(), address.getPincode());
+        int ar = jdbcTemplate.update("INSERT INTO Address (studentId, street, city,pincode) VALUES (?,?,?,?)", studentId, address.getStreet(), address.getCity(), address.getPincode());
 
-        System.out.println("Rows Updated for address: " + ar);
+        System.out.println("Rows Updated for address: "+ar);
 
         return ar;
     }

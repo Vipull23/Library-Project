@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class StudentCreationResponse extends Response {
 
-    private Integer id;
+    private int id;
     private String name;
     private String email;
 }

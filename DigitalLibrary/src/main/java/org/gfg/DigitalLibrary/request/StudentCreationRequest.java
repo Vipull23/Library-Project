@@ -7,15 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.gfg.DigitalLibrary.model.Address;
 
+import java.time.LocalDate;
+
 
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class StudentCreationRequest {
 
     @NotNull
-//    @Length(min = 2, max = 18)
     String name;
     @NotNull
     String email;
@@ -24,6 +23,6 @@ public class StudentCreationRequest {
     @NotNull
     Address address;
     @NotNull
-    String dob;
+    LocalDate dob;
 
 }
