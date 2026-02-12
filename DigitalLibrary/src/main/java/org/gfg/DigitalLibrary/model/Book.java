@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class Book {
     private Integer bookId;
+    private String description;
     private String bookName;
     double price ;
     private String publisher;
