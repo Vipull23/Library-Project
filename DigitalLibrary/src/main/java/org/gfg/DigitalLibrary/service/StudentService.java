@@ -23,6 +23,7 @@ public class StudentService {
         String email = studentCreationRequest.getEmail();
         String mobileNumber = studentCreationRequest.getMobileNumber();
         LocalDate dob = studentCreationRequest.getDob();
+//        String dob = studentCreationRequest.getDob();
         Address address = studentCreationRequest.getAddress();
 
         Student student = Student.builder().name(name).email(email).mobileNumber(mobileNumber).dob(dob).address(address).build();

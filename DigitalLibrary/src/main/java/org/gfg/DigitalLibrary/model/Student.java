@@ -23,6 +23,7 @@ public class Student {
     private String mobileNumber;
     private Address address;
     private LocalDate dob;
+    //private String dob;
     private StudentStatus studentStatus;
     List<Book> issuedBooks;
     Date createdOn;
