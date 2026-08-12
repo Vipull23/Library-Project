@@ -25,25 +25,29 @@ public class TransactionRepository {
         int bookId = bookTransactionRequest.getBookId();
         String cost = bookTransactionRequest.getAmount();
         String txnType = "ISSUE";
-        java.sql.Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         String sql = "";
         int result = -1;
 
         if ("ISSUE".equalsIgnoreCase(bookTransactionRequest.getRequestType())) {
-            String bookQuery = "UPDATED BOOK SET STUDENT_ID =? WHERE BOOK_ID=?";
+            // FIX: 'book' primary key is 'id', foreign key is 'student_id'
+            String bookQuery = "UPDATE book SET student_id = ? WHERE id = ?";
             jdbcTemplate.update(bookQuery, studentId, bookId);
-            sql = "INSERT INTO Transactions (TXN_ID, STUDENT_ID,BOOK_ID,ISSUED_TIME, UPDATED_TIME, COST, TXN_TYPE)" +
-                    " VALUES (?,?,?,?,?,?,?)";
+
+            // FIX: Table is 'transaction' (singular, lowercase)
+            sql = "INSERT INTO transaction (txn_id, student_id, book_id, issued_time, updated_time, cost, txn_type) " +
+                    "VALUES (?,?,?,?,?,?,?)";
             txnType = "ISSUE";
             result = jdbcTemplate.update(sql, txnId, studentId, bookId, currentTime, currentTime, cost, txnType);
         } else if ("RENEW".equalsIgnoreCase(bookTransactionRequest.getRequestType())) {
-            sql = "UPDATE transactions SET TXN_TYPE=?, UPDATED_TIME=? WHERE STUDENT_ID=? AND BOOK_ID=?";
+            sql = "UPDATE transaction SET txn_type = ?, updated_time = ? WHERE student_id = ? AND book_id = ?";
             txnType = "RENEW";
-            result = jdbcTemplate.update(sql, currentTime, txnType, studentId, bookId);
+            result = jdbcTemplate.update(sql, txnType, currentTime, studentId, bookId);
         } else {
-            String bookQuery = "UPDATE BOOK SET STUDENT_ID=?, WHERE BOOK_ID=?";
-            jdbcTemplate.update(bookQuery, null, bookId);
-            sql = "UPDATE transactions SET TXN_TYPE=?, UPDATED_TIME=?,COST=? WHERE BOOK_ID=? AND STUDENT_ID=?";
+            String bookQuery = "UPDATE book SET student_id = ? WHERE id = ?";
+            jdbcTemplate.update(bookQuery, (Object) null, bookId);
+
+            sql = "UPDATE transaction SET txn_type = ?, updated_time = ?, cost = ? WHERE book_id = ? AND student_id = ?";
             txnType = "RETURN";
             int fine = calculateFine(bookTransactionRequest);
             result = jdbcTemplate.update(sql, txnType, currentTime, fine, bookId, studentId);
@@ -53,15 +57,16 @@ public class TransactionRepository {
     }
 
     private int calculateFine(BookTransactionRequest bookTransactionRequest) {
-        String getDataQuery = "SELECT * FROM transactions WHERE STUDENT_ID=? AND BOOK_ID=? ";
+        String getDataQuery = "SELECT * FROM transaction WHERE student_id = ? AND book_id = ?";
+
         Transaction transaction = jdbcTemplate.queryForObject(getDataQuery, new RowMapper<Transaction>() {
             @Override
             public Transaction mapRow(ResultSet rs, int rowNum) throws SQLException {
                 Transaction transaction = new Transaction();
-                transaction.setCreatedOn(rs.getTimestamp("ISSUED TIME"));
+                transaction.setCreatedOn(rs.getTimestamp("issued_time"));
                 return transaction;
             }
-        });
+        }, bookTransactionRequest.getStudentId(), bookTransactionRequest.getBookId());
 
         long issuedTime = transaction.getCreatedOn().getTime();
         long currentTime = System.currentTimeMillis();
@@ -71,3 +76,5 @@ public class TransactionRepository {
         return (int) diff * 2 - (Integer.parseInt(bookTransactionRequest.getAmount()));
     }
 }
+
+

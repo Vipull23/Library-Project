@@ -26,7 +26,10 @@ public class BookRepository {
     }
 
     public Book findBookById(int id) {
-        String query = "SELECT BOOK_ID FROM book where BOOK_ID=?";
+        // FIX #6: query previously selected only BOOK_ID but the RowMapper read 3 columns
+        // (indices 1, 2, 3), which throws SQLException: invalid column index at runtime.
+        // Now selecting all 3 columns the mapper actually reads.
+        String query = "SELECT id, name, description FROM book WHERE id = ?";
         Book book = jdbcTemplate.queryForObject(query, new RowMapper<Book>() {
             @Override
             public Book mapRow(ResultSet rs, int rowNum) throws SQLException {

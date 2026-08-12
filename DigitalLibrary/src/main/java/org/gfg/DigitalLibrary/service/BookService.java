@@ -8,6 +8,8 @@ import org.gfg.DigitalLibrary.request.BookCreationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class BookService {
 
@@ -25,32 +27,18 @@ public class BookService {
         Author author = Author.builder().name(bookCreationRequest.getAuthorName()).email(bookCreationRequest.getAuthorEmail()).mobileNumber(bookCreationRequest.getAuthorMobile()).build();
 
         int bookUpdated = 0;
-        boolean authorExist = false;
+
+        // FIX #7 (continued): checkAuthor now returns Optional<Author> instead of throwing
+        // an exception on "not found", so the old try/catch-as-control-flow is gone.
+        // We just check whether the Optional is present.
+        Optional<Author> dbAuthor = authorRepository.checkAuthor(author.getEmail(), author.getMobileNumber());
+        boolean authorExists = dbAuthor.isPresent() && dbAuthor.get().getName() != null && !dbAuthor.get().getName().isEmpty();
 
         try {
-            //Create Author if not exist
-            Author dbAuthor = authorRepository.checkAuthor(author.getEmail(), author.getMobileNumber());
-            if (dbAuthor == null || dbAuthor.getName() == null || dbAuthor.getName().isEmpty()) {
-                //author does not exist we need to create author
-
-                // create book in database
-                int rows = authorRepository.createAuthor(author);
-            }
-//            bookUpdated = bookRepository.createBookInDatabase(book);
-            authorExist = true;
-
-        } catch (Exception e) {
-            System.out.println(e);
-            System.out.println("Going to create author");
-            authorExist = false;
-        }
-        try {
-            if (!authorExist) {
-                int rows = authorRepository.createAuthor(author);
-
+            if (!authorExists) {
+                authorRepository.createAuthor(author);
             }
             bookUpdated = bookRepository.createBookInDatabase(book);
-
         } catch (Exception e) {
             System.out.println(e);
         }

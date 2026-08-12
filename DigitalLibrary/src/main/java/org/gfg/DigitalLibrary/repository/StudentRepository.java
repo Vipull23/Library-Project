@@ -52,10 +52,13 @@ public class StudentRepository {
 
         System.out.println("Student Data inserted");
         Address address = student.getAddress();
-        int ar = jdbcTemplate.update("INSERT INTO Address (studentId, street, city,pincode) VALUES (?,?,?,?)", studentId, address.getStreet(), address.getCity(), address.getPincode());
+        int ar = jdbcTemplate.update("INSERT INTO address (studentId, street, city,pincode) VALUES (?,?,?,?)", studentId, address.getStreet(), address.getCity(), address.getPincode());
 
         System.out.println("Rows Updated for address: "+ar);
 
         return ar;
     }
 }
+
+
+
